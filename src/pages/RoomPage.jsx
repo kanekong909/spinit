@@ -26,10 +26,21 @@ export default function RoomPage() {
   const { room, players, spunIds, result, error, connected, submitSpin } = useRoom(roomId, me?.id)
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('spinit_player')
+    // Try room-specific localStorage key first (survives browser close)
+    // Fall back to sessionStorage for backward compat
+    const localKey = `spinit_player_${roomId}`
+    const stored = localStorage.getItem(localKey) || sessionStorage.getItem('spinit_player')
     if (!stored) { navigate('/'); return }
-    setMe(JSON.parse(stored))
-  }, [])
+    const session = JSON.parse(stored)
+    // Ensure session is for this room
+    if (session.room_id && session.room_id !== roomId) {
+      navigate('/')
+      return
+    }
+    // Keep sessionStorage in sync
+    sessionStorage.setItem('spinit_player', stored)
+    setMe(session)
+  }, [roomId])
 
   // When result arrives → show wheel flip first, then reveal card
   useEffect(() => {

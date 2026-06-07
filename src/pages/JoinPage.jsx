@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
 import { AVATAR_STYLES, avatarSVG } from '../lib/avatar'
@@ -15,6 +15,32 @@ export default function JoinPage() {
   // Se reemplaza por el nombre real solo al hacer submit.
   const previewSeed = useRef('user_' + Math.random().toString(36).slice(2, 8))
 
+  // Si ya tengo sesión guardada para esta sala → entrar directo sin pedir nombre
+  useEffect(() => {
+    async function checkExistingSession() {
+      try {
+        const room = await api.getRoom(roomCode)
+        const key = `spinit_player_${room.id}`
+        const stored = localStorage.getItem(key)
+        if (stored) {
+          const session = JSON.parse(stored)
+          // Re-mark player as online on backend
+          await api.joinRoom(room.id, {
+            name: session.name,
+            avatar_style: session.avatar_style,
+            avatar_seed: session.avatar_seed,
+          }).catch(() => {}) // may 409 if already in room — that's fine
+          // Refresh session in localStorage
+          localStorage.setItem(key, JSON.stringify(session))
+          navigate(`/room/${room.id}`)
+        }
+      } catch {
+        // Room not found or network error — show the form normally
+      }
+    }
+    if (roomCode) checkExistingSession()
+  }, [roomCode])
+
   async function handleJoin(e) {
     e.preventDefault()
     if (!name.trim()) return
@@ -28,14 +54,15 @@ export default function JoinPage() {
         avatar_seed: name.trim(),
       })
 
-      const isOwner = sessionStorage.getItem('spinit_pending_owner') === room.id
+      const isOwner = localStorage.getItem('spinit_pending_owner') === room.id
       // If this player just created this room, claim ownership
       if (isOwner && !room.owner_id) {
         await api.updateRoom(room.id, { owner_id: player.id })
-        sessionStorage.removeItem('spinit_pending_owner')
+        localStorage.removeItem('spinit_pending_owner')
       }
 
-      sessionStorage.setItem('spinit_player', JSON.stringify({
+      // Save per-room session in localStorage (survives browser close)
+      const sessionData = {
         id: player.id,
         name: player.name,
         avatar_style: player.avatar_style,
@@ -43,7 +70,10 @@ export default function JoinPage() {
         room_id: room.id,
         room_code: room.code,
         is_owner: isOwner,
-      }))
+      }
+      localStorage.setItem(`spinit_player_${room.id}`, JSON.stringify(sessionData))
+      // Also keep sessionStorage for backward compat with RoomPage
+      sessionStorage.setItem('spinit_player', JSON.stringify(sessionData))
       navigate(`/room/${room.id}`)
     } catch (e) {
       setError(e.message)

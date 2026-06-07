@@ -59,7 +59,7 @@ export default function HomePage() {
         prize: mode === 'raffle' ? prize.trim() || null : null,
       })
       // Store intended-as-owner flag so JoinPage can claim ownership
-      sessionStorage.setItem('spinit_pending_owner', room.id)
+      localStorage.setItem('spinit_pending_owner', room.id)
       navigate(`/join/${room.code}`)
     } catch (e) {
       setError(e.message)
