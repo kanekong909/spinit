@@ -1,0 +1,2 @@
+Ejecutar frontend
+npm run dev
