@@ -24,14 +24,21 @@ export default function JoinPage() {
         const stored = localStorage.getItem(key)
         if (stored) {
           const session = JSON.parse(stored)
-          // Re-mark player as online on backend
-          await api.joinRoom(room.id, {
+          // Re-mark player as online — backend returns the existing player record
+          const updatedPlayer = await api.joinRoom(room.id, {
             name: session.name,
             avatar_style: session.avatar_style,
             avatar_seed: session.avatar_seed,
-          }).catch(() => {}) // may 409 if already in room — that's fine
-          // Refresh session in localStorage
-          localStorage.setItem(key, JSON.stringify(session))
+          }).catch(() => null)
+
+          // Update session with fresh player data (id may be same, but ensure it's current)
+          const freshSession = updatedPlayer ? {
+            ...session,
+            id: updatedPlayer.id,  // use the player id the backend returned
+          } : session
+
+          localStorage.setItem(key, JSON.stringify(freshSession))
+          sessionStorage.setItem('spinit_player', JSON.stringify(freshSession))
           navigate(`/room/${room.id}`)
         }
       } catch {
