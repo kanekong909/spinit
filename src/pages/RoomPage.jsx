@@ -95,6 +95,10 @@ export default function RoomPage() {
   const progressPct   = totalOnline > 0 ? Math.round((spunCount / totalOnline) * 100) : 0
   const isOwner       = me?.is_owner || room?.owner_id === me?.id
   const isRaffle      = room.mode === 'raffle'
+  // In raffle mode the wheel sectors ARE the player names
+  const wheelOptions  = isRaffle
+    ? onlinePlayers.map(p => p.name)
+    : room.options
   // Wheel is revealed once result is shown
   const wheelRevealed = showResult
 
@@ -142,7 +146,7 @@ export default function RoomPage() {
           <div style={{ ...s.wheelWrap, marginBottom: 44 /* space for hidden label */ }}>
             <Wheel
               ref={wheelRef}
-              options={room.options}
+              options={wheelOptions.length > 0 ? wheelOptions : room.options}
               revealed={wheelRevealed}
             />
           </div>
@@ -263,7 +267,7 @@ export default function RoomPage() {
                   </div>
                   <p style={{ ...s.resultValue, fontSize: 24 }}>{result.raffle_winner_name}</p>
                   <p style={s.resultMeta}>
-                    Cayó en <strong style={{ color: '#D85A30' }}>{result.winner}</strong>
+                    Cayó en el sector <strong style={{ color: '#D85A30' }}>{result.winner}</strong>
                     {result.raffle_tiebreak && ' · Sorteado entre varios ganadores'}
                   </p>
                   <VoteBreakdown result={result} />
@@ -340,10 +344,10 @@ export default function RoomPage() {
           </div>
 
           <p style={{ ...s.sideLabel, marginTop: '1.25rem' }}>
-            Opciones ({room.options.length})
+            {isRaffle ? `Participantes (${wheelOptions.length})` : `Opciones (${room.options.length})`}
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {room.options.map((opt, i) => (
+            {(isRaffle ? wheelOptions : room.options).map((opt, i) => (
               <span key={opt + i} style={{
                 ...s.optionTag,
                 background: result?.winner === opt && showResult ? 'rgba(216,90,48,0.15)' : 'rgba(255,255,255,0.05)',

@@ -38,8 +38,13 @@ export default function HomePage() {
 
   async function handleCreate(e) {
     e.preventDefault()
-    const options = optionsRaw.split(',').map(s => s.trim()).filter(Boolean)
-    if (options.length < 2) { setError('Mínimo 2 opciones separadas por coma'); return }
+    let options
+      if (mode === 'raffle') {
+        options = ['sorteo']
+      } else {
+        options = optionsRaw.split(',').map(s => s.trim()).filter(Boolean)
+        if (options.length < 2) { setError('Mínimo 2 opciones separadas por coma'); return }
+      }
     if (!roomName.trim()) { setError('Ponle un nombre a la sala'); return }
     setLoading(true); setError('')
     try {
@@ -130,20 +135,32 @@ export default function HomePage() {
               autoFocus
             />
 
-            <p style={s.sectionLabel}>Opciones de la ruleta <span style={{ color: 'rgba(255,255,255,0.2)' }}>(separadas por coma · máx. 8)</span></p>
-            <textarea
-              value={optionsRaw}
-              onChange={e => setOptionsRaw(e.target.value)}
-              rows={3}
-              style={{ ...s.input, width: '100%', resize: 'vertical', fontFamily: "'DM Sans', sans-serif", marginBottom: '0.5rem' }}
-            />
-
-            {/* Preview tags */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: '1.25rem', minHeight: 28 }}>
-              {optionsRaw.split(',').map(o => o.trim()).filter(Boolean).slice(0, 8).map((opt, i) => (
-                <span key={i} style={s.tag}>{opt}</span>
-              ))}
-            </div>
+            {/* Options field — only for group mode */}
+            {mode === 'group' ? (
+              <>
+                <p style={s.sectionLabel}>Opciones de la ruleta <span style={{ color: 'rgba(255,255,255,0.2)' }}>(separadas por coma · máx. 8)</span></p>
+                <textarea
+                  value={optionsRaw}
+                  onChange={e => setOptionsRaw(e.target.value)}
+                  rows={3}
+                  style={{ ...s.input, width: '100%', resize: 'vertical', fontFamily: "'DM Sans', sans-serif", marginBottom: '0.5rem' }}
+                />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: '1.25rem', minHeight: 28 }}>
+                  {optionsRaw.split(',').map(o => o.trim()).filter(Boolean).slice(0, 8).map((opt, i) => (
+                    <span key={i} style={s.tag}>{opt}</span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div style={{ marginBottom: '1.25rem', padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10 }}>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
+                  🎡 <strong style={{ color: 'rgba(255,255,255,0.7)' }}>La ruleta se auto-llena</strong> con los nombres de los jugadores que estén en la sala al momento de girar.
+                </p>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 6 }}>
+                  Cada sector = un participante. El sistema elige un sector al azar y quien cayó ahí gana el premio.
+                </p>
+              </div>
+            )}
 
             {/* Mode selector */}
             <p style={s.sectionLabel}>Modo de juego</p>
