@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { api } from '../lib/api'
 
 const DEFAULT_OPTIONS = 'Pizza, Cine, Sushi, Karaoke'
@@ -202,7 +202,7 @@ export default function HomePage() {
         {error && <p style={s.error}>{error}</p>}
 
         <p style={{ textAlign: 'center', marginTop: '2rem' }}>
-          <a href="/admin" style={{ fontSize: 11, color: 'rgba(255,255,255,0.15)', textDecoration: 'none' }}>admin</a>
+          <Link to="/admin" style={{ fontSize: 11, color: 'rgba(255,255,255,0.15)', textDecoration: 'none' }}>admin</Link>
         </p>
       </div>
     </div>
