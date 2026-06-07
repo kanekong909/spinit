@@ -1,32 +1,44 @@
 import { useState, useEffect } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../lib/api'
 
 export default function AdminPage() {
-  const [password, setPassword] = useState('')
-  const [authed, setAuthed] = useState(false)
-  const [rooms, setRooms] = useState([])
-  const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState({ name: '', options: 'Pizza, Cine, Sushi, Karaoke', is_permanent: false })
-  const [msg, setMsg] = useState('')
+  const navigate = useNavigate()
+  const [password, setPassword]   = useState('')
+  const [authed, setAuthed]       = useState(false)
+  const [rooms, setRooms]         = useState([])
+  const [creating, setCreating]   = useState(false)
+  const [form, setForm]           = useState({
+    name: '', options: 'Pizza, Cine, Sushi, Karaoke',
+    is_permanent: false, mode: 'group', prize: ''
+  })
+  const [msg, setMsg]       = useState('')
   const [loading, setLoading] = useState(false)
 
   async function loadRooms() {
-    try {
-      const data = await api.listRooms()
-      setRooms(data)
-    } catch (e) { setMsg(e.message) }
+    try { setRooms(await api.listRooms()) }
+    catch (e) { setMsg(e.message) }
   }
 
   useEffect(() => { if (authed) loadRooms() }, [authed])
 
   async function handleCreate(e) {
     e.preventDefault()
-    setLoading(true)
-    setMsg('')
+    setLoading(true); setMsg('')
     try {
-      const options = form.options.split(',').map(s => s.trim()).filter(Boolean)
-      if (options.length < 2) { setMsg('Mínimo 2 opciones'); setLoading(false); return }
-      await api.createRoom({ name: form.name, options, is_permanent: form.is_permanent, admin_password: password })
+      const options = form.mode === 'raffle'
+        ? ['sorteo']
+        : form.options.split(',').map(s => s.trim()).filter(Boolean)
+      if (form.mode === 'group' && options.length < 2) {
+        setMsg('Mínimo 2 opciones'); setLoading(false); return
+      }
+      await api.createRoom({
+        name: form.name, options,
+        is_permanent: form.is_permanent,
+        owner_id: password,   // admin password acts as owner_id for server-level ops
+        mode: form.mode,
+        prize: form.mode === 'raffle' ? form.prize || null : null,
+      })
       setMsg('✅ Sala creada')
       setCreating(false)
       loadRooms()
@@ -37,8 +49,8 @@ export default function AdminPage() {
   async function handleStatus(roomId, newStatus) {
     setMsg('')
     try {
-      await api.changeStatus(roomId, { admin_password: password, new_status: newStatus })
-      setMsg(`✅ Estado cambiado a ${newStatus}`)
+      await api.changeStatus(roomId, { owner_id: password, new_status: newStatus })
+      setMsg(`✅ Estado → ${newStatus}`)
       loadRooms()
     } catch (e) { setMsg(e.message) }
   }
@@ -46,125 +58,188 @@ export default function AdminPage() {
   async function handleDelete(roomId) {
     if (!confirm('¿Eliminar esta sala?')) return
     try {
-      await api.deleteRoom(roomId, { admin_password: password })
+      await api.deleteRoom(roomId, { owner_id: password })
+      setMsg('✅ Sala eliminada')
       loadRooms()
     } catch (e) { setMsg(e.message) }
   }
 
+  // ── Login screen ──
   if (!authed) {
     return (
-      <div style={styles.page}>
-        <div style={styles.card}>
-          <div style={styles.logo}>Spin<span style={{ color: '#D85A30' }}>it</span> <span style={{ fontWeight: 400, fontSize: 16, color: 'rgba(255,255,255,0.4)' }}>Admin</span></div>
+      <div style={s.page}>
+        <div style={s.loginCard}>
+          <Link to="/lobby" style={s.backLink}>← Volver</Link>
+          <div style={s.logo}>Spin<span style={{ color: '#D85A30' }}>it</span>
+            <span style={s.adminTag}>Admin</span>
+          </div>
+          <p style={s.loginHint}>Contraseña de administrador</p>
           <input
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="Contraseña de admin..."
-            style={styles.input}
-            onKeyDown={e => e.key === 'Enter' && setAuthed(true)}
+            placeholder="Contraseña..."
+            style={s.input}
+            onKeyDown={e => e.key === 'Enter' && password && setAuthed(true)}
             autoFocus
           />
-          <button onClick={() => setAuthed(true)} style={styles.btn}>Entrar</button>
+          <button
+            onClick={() => password && setAuthed(true)}
+            disabled={!password}
+            style={{ ...s.btnPrimary, width: '100%', marginTop: 12, opacity: password ? 1 : 0.4 }}
+          >
+            Entrar
+          </button>
         </div>
       </div>
     )
   }
 
+  // ── Main admin panel ──
   return (
-    <div style={styles.page}>
+    <div style={s.page}>
       <div style={{ maxWidth: 700, width: '100%' }}>
+
+        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={styles.logo}>Spin<span style={{ color: '#D85A30' }}>it</span> <span style={{ fontWeight: 400, fontSize: 16, color: 'rgba(255,255,255,0.4)' }}>Admin</span></div>
-          <button onClick={() => setCreating(!creating)} style={styles.btn}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Link to="/lobby" style={s.backBtn}>←</Link>
+            <div style={s.logo}>
+              Spin<span style={{ color: '#D85A30' }}>it</span>
+              <span style={s.adminTag}>Admin</span>
+            </div>
+          </div>
+          <button onClick={() => setCreating(!creating)} style={s.btnPrimary}>
             {creating ? 'Cancelar' : '+ Nueva sala'}
           </button>
         </div>
 
-        {msg && <p style={{ color: msg.startsWith('✅') ? '#1D9E75' : '#F09595', fontSize: 13, marginBottom: '1rem' }}>{msg}</p>}
+        {msg && (
+          <p style={{ color: msg.startsWith('✅') ? '#1D9E75' : '#F09595', fontSize: 13, marginBottom: '1rem' }}>
+            {msg}
+          </p>
+        )}
 
+        {/* Create form */}
         {creating && (
-          <form onSubmit={handleCreate} style={styles.createCard}>
-            <p style={styles.sectionLabel}>Nueva sala</p>
+          <form onSubmit={handleCreate} style={s.createCard}>
+            <p style={s.sectionLabel}>Nombre de la sala</p>
             <input
               value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
-              placeholder="Nombre de la sala..."
+              placeholder="Nombre..."
               required
-              style={styles.input}
+              style={{ ...s.input, width: '100%', marginBottom: 12 }}
             />
-            <p style={{ ...styles.sectionLabel, marginTop: 12 }}>Opciones (separadas por coma, máx. 8)</p>
-            <textarea
-              value={form.options}
-              onChange={e => setForm({ ...form, options: e.target.value })}
-              rows={2}
-              style={{ ...styles.input, resize: 'vertical', fontFamily: "'DM Sans', sans-serif" }}
-            />
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 8 }}>
+
+            <p style={s.sectionLabel}>Modo</p>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              {[['group','🎯 Decisión'],['raffle','🎰 Sorteo']].map(([val, label]) => (
+                <button key={val} type="button"
+                  onClick={() => setForm({ ...form, mode: val })}
+                  style={{
+                    flex: 1, fontSize: 13, fontWeight: 500,
+                    padding: '8px', borderRadius: 8, cursor: 'pointer',
+                    fontFamily: "'DM Sans', sans-serif",
+                    background: form.mode === val ? 'rgba(216,90,48,0.15)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${form.mode === val ? 'rgba(216,90,48,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                    color: form.mode === val ? '#D85A30' : 'rgba(255,255,255,0.4)',
+                  }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {form.mode === 'group' ? (
+              <>
+                <p style={s.sectionLabel}>Opciones (separadas por coma)</p>
+                <textarea
+                  value={form.options}
+                  onChange={e => setForm({ ...form, options: e.target.value })}
+                  rows={2}
+                  style={{ ...s.input, width: '100%', resize: 'vertical', fontFamily: "'DM Sans',sans-serif", marginBottom: 12 }}
+                />
+              </>
+            ) : (
+              <>
+                <p style={s.sectionLabel}>Premio <span style={{ color: 'rgba(255,255,255,0.2)' }}>(opcional)</span></p>
+                <input
+                  value={form.prize}
+                  onChange={e => setForm({ ...form, prize: e.target.value })}
+                  placeholder="Ej: Cena gratis 🍕"
+                  maxLength={120}
+                  style={{ ...s.input, width: '100%', marginBottom: 12 }}
+                />
+              </>
+            )}
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>
               <input
                 type="checkbox"
                 checked={form.is_permanent}
                 onChange={e => setForm({ ...form, is_permanent: e.target.checked })}
               />
-              Sala permanente (sin expiración)
+              Sala permanente
             </label>
-            <button type="submit" disabled={loading} style={{ ...styles.btn, marginTop: 16, opacity: loading ? 0.5 : 1 }}>
+
+            <button type="submit" disabled={loading} style={{ ...s.btnPrimary, opacity: loading ? 0.5 : 1 }}>
               {loading ? 'Creando...' : 'Crear sala'}
             </button>
           </form>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* Room list */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {rooms.map(room => (
-            <div key={room.id} style={styles.roomCard}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+            <div key={room.id} style={s.roomCard}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <div>
-                  <p style={{ fontWeight: 600, fontSize: 16 }}>{room.name}</p>
-                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
-                    #{room.code} · {room.is_permanent ? 'Permanente' : 'Temporal'} · Ronda {room.round_number}
+                  <p style={{ fontWeight: 600, fontSize: 15 }}>{room.name}</p>
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                    #{room.code} · {room.mode === 'raffle' ? '🎰 Sorteo' : '🎯 Decisión'}
+                    {room.prize && ` · ${room.prize}`}
+                    {room.is_permanent && ' · Permanente'}
+                    {' · Ronda '}{room.round_number}
                   </p>
                 </div>
                 <span style={{
-                  fontSize: 12, fontWeight: 500,
-                  background: room.status === 'spinning' ? 'rgba(216,90,48,0.2)' : 'rgba(255,255,255,0.06)',
-                  color: room.status === 'spinning' ? '#D85A30' : 'rgba(255,255,255,0.4)',
-                  border: `1px solid ${room.status === 'spinning' ? 'rgba(216,90,48,0.3)' : 'rgba(255,255,255,0.08)'}`,
-                  borderRadius: 20,
-                  padding: '3px 10px',
+                  fontSize: 11, fontWeight: 500, borderRadius: 20, padding: '3px 10px',
+                  background: room.status === 'spinning' ? 'rgba(216,90,48,0.2)' : 'rgba(255,255,255,0.05)',
+                  color: room.status === 'spinning' ? '#D85A30' : 'rgba(255,255,255,0.35)',
+                  border: `1px solid ${room.status === 'spinning' ? 'rgba(216,90,48,0.3)' : 'rgba(255,255,255,0.07)'}`,
                 }}>
                   {room.status}
                 </span>
               </div>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
-                {room.options.map((opt, i) => (
-                  <span key={i} style={styles.tag}>{opt}</span>
-                ))}
-              </div>
+              {room.mode === 'group' && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
+                  {room.options.map((opt, i) => (
+                    <span key={i} style={s.tag}>{opt}</span>
+                  ))}
+                </div>
+              )}
 
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {room.status === 'waiting' && (
-                  <button onClick={() => handleStatus(room.id, 'spinning')} style={styles.actionBtn}>
-                    ▶ Iniciar ronda
-                  </button>
+                  <button onClick={() => handleStatus(room.id, 'spinning')} style={s.actionBtn}>▶ Iniciar</button>
                 )}
                 {room.status === 'spinning' && (
-                  <button onClick={() => handleStatus(room.id, 'waiting')} style={styles.actionBtn}>
-                    ⏸ Pausar
-                  </button>
+                  <button onClick={() => handleStatus(room.id, 'waiting')} style={s.actionBtn}>⏸ Pausar</button>
                 )}
                 {room.status === 'revealing' && (
-                  <button onClick={() => handleStatus(room.id, 'waiting')} style={styles.actionBtn}>
-                    ↺ Nueva ronda
-                  </button>
+                  <button onClick={() => handleStatus(room.id, 'spinning')} style={s.actionBtn}>↺ Nueva ronda</button>
                 )}
                 <button
-                  onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/join/${room.code}`) }}
-                  style={{ ...styles.actionBtn, background: 'rgba(255,255,255,0.04)' }}
+                  onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/join/${room.code}`); setMsg('✅ Link copiado') }}
+                  style={{ ...s.actionBtn, color: 'rgba(255,255,255,0.4)' }}
                 >
                   📋 Copiar link
                 </button>
-                <button onClick={() => handleDelete(room.id)} style={{ ...styles.actionBtn, color: '#F09595', background: 'rgba(240,149,149,0.08)', border: '1px solid rgba(240,149,149,0.15)' }}>
+                <button
+                  onClick={() => handleDelete(room.id)}
+                  style={{ ...s.actionBtn, color: '#F09595', background: 'rgba(240,149,149,0.06)', border: '1px solid rgba(240,149,149,0.15)' }}
+                >
                   Eliminar
                 </button>
               </div>
@@ -172,7 +247,7 @@ export default function AdminPage() {
           ))}
 
           {rooms.length === 0 && !creating && (
-            <p style={{ color: 'rgba(255,255,255,0.25)', textAlign: 'center', padding: '2rem' }}>
+            <p style={{ color: 'rgba(255,255,255,0.2)', textAlign: 'center', padding: '3rem 0' }}>
               No hay salas. Crea una con el botón de arriba.
             </p>
           )}
@@ -182,91 +257,66 @@ export default function AdminPage() {
   )
 }
 
-const styles = {
+const s = {
   page: {
-    minHeight: '100vh',
-    background: '#0f0f0f',
-    color: 'white',
+    minHeight: '100vh', background: '#0f0f0f', color: 'white',
     fontFamily: "'DM Sans', sans-serif",
-    display: 'flex',
-    justifyContent: 'center',
-    padding: '2rem 1rem',
+    display: 'flex', justifyContent: 'center', padding: '2rem 1rem',
   },
-  card: {
-    background: '#1a1a1a',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 16,
-    padding: '2rem',
-    width: '100%',
-    maxWidth: 380,
-    alignSelf: 'flex-start',
+  loginCard: {
+    background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: 16, padding: '2rem', width: '100%', maxWidth: 360, alignSelf: 'flex-start',
+  },
+  backLink: {
+    display: 'block', fontSize: 13, color: 'rgba(255,255,255,0.3)',
+    textDecoration: 'none', marginBottom: '1rem',
+  },
+  backBtn: {
+    background: 'none', border: '1px solid rgba(255,255,255,0.1)',
+    color: 'rgba(255,255,255,0.35)', fontSize: 16, cursor: 'pointer',
+    borderRadius: 8, padding: '4px 10px', textDecoration: 'none',
+    fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5,
   },
   logo: {
-    fontFamily: "'Syne', sans-serif",
-    fontSize: 26,
-    fontWeight: 800,
-    marginBottom: '1.5rem',
+    fontFamily: "'Syne', sans-serif", fontSize: 24, fontWeight: 800,
+    display: 'flex', alignItems: 'center', gap: 8,
   },
+  adminTag: {
+    fontSize: 12, fontWeight: 400, color: 'rgba(255,255,255,0.3)',
+    fontFamily: "'DM Sans', sans-serif",
+  },
+  loginHint: { fontSize: 13, color: 'rgba(255,255,255,0.35)', margin: '1.25rem 0 8px' },
   input: {
-    width: '100%',
-    fontSize: 14,
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 8,
-    padding: '10px 12px',
-    color: 'white',
-    boxSizing: 'border-box',
-    outline: 'none',
+    fontSize: 14, background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
+    padding: '10px 12px', color: 'white', outline: 'none', boxSizing: 'border-box',
   },
-  btn: {
-    fontFamily: "'Syne', sans-serif",
-    fontWeight: 700,
-    fontSize: 13,
-    background: '#D85A30',
-    color: 'white',
-    border: 'none',
-    borderRadius: 8,
-    padding: '10px 20px',
-    cursor: 'pointer',
-    marginTop: 12,
+  btnPrimary: {
+    fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13,
+    background: '#D85A30', color: 'white', border: 'none',
+    borderRadius: 8, padding: '10px 20px', cursor: 'pointer',
   },
   createCard: {
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 14,
-    padding: '1.25rem',
-    marginBottom: '1.5rem',
+    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: 14, padding: '1.25rem', marginBottom: '1.25rem',
   },
   sectionLabel: {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.35)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginBottom: 8,
+    fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase',
+    letterSpacing: '0.5px', marginBottom: 8,
   },
   roomCard: {
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.07)',
-    borderRadius: 14,
-    padding: '1.25rem',
+    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)',
+    borderRadius: 14, padding: '1.25rem',
   },
   tag: {
-    fontSize: 12,
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20,
-    padding: '2px 8px',
-    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12, background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20,
+    padding: '2px 8px', color: 'rgba(255,255,255,0.4)',
   },
   actionBtn: {
-    fontSize: 12,
-    fontWeight: 500,
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 8,
-    padding: '6px 14px',
-    color: 'rgba(255,255,255,0.7)',
-    cursor: 'pointer',
-    fontFamily: "'DM Sans', sans-serif",
+    fontSize: 12, fontWeight: 500, background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.09)', borderRadius: 8,
+    padding: '6px 12px', color: 'rgba(255,255,255,0.6)',
+    cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
   },
 }

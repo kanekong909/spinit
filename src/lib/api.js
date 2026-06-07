@@ -21,7 +21,7 @@ export const api = {
   getRoom:      (ref)            => req('GET',    `/rooms/${ref}`),
   updateRoom:   (id, data)       => req('PATCH',  `/rooms/${id}`, data),
   changeStatus: (id, data)       => req('POST',   `/rooms/${id}/status`, data),
-  deleteRoom:   (id, data)       => req('DELETE', `/rooms/${id}`, data),
+  deleteRoom:   (id, data)       => req('POST',   `/rooms/${id}/delete`, data),
 
   // Players
   joinRoom:   (roomId, data)           => req('POST',   `/rooms/${roomId}/players/`, data),
