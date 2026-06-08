@@ -8,6 +8,7 @@ export function useRoom(roomId, playerId) {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [connected, setConnected] = useState(false)
+  const [wsReady, setWsReady] = useState(false)  // true once init received
   const wsRef = useRef(null)
 
   const handleEvent = useCallback((msg) => {
@@ -16,6 +17,7 @@ export function useRoom(roomId, playerId) {
         setRoom(msg.room)
         setPlayers(msg.players)
         setSpunIds(new Set(msg.players.filter(p => p.has_spun).map(p => p.id)))
+        setWsReady(true)
         break
 
       case 'player_joined':
@@ -69,7 +71,7 @@ export function useRoom(roomId, playerId) {
     })
 
     ws.onopen = () => setConnected(true)
-    ws.onclose = () => setConnected(false)
+    ws.onclose = () => { setConnected(false); setWsReady(false) }
     ws.onerror = () => setError('Error de conexión WebSocket')
 
     wsRef.current = ws
@@ -84,5 +86,5 @@ export function useRoom(roomId, playerId) {
     }
   }, [roomId, playerId])
 
-  return { room, players, spunIds, result, error, connected, submitSpin }
+  return { room, players, spunIds, result, error, connected, wsReady, submitSpin }
 }

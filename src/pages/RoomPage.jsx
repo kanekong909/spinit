@@ -23,7 +23,7 @@ export default function RoomPage() {
   const [showResult, setShowResult] = useState(false)
   const [rafflePhase, setRafflePhase] = useState('idle') // idle | drumroll | winner
 
-  const { room, players, spunIds, result, error, connected, submitSpin } = useRoom(roomId, me?.id)
+  const { room, players, spunIds, result, error, connected, wsReady, submitSpin } = useRoom(roomId, me?.id)
 
   useEffect(() => {
     // Try room-specific localStorage key first (survives browser close)
@@ -114,8 +114,8 @@ export default function RoomPage() {
   const wheelOptions  = isRaffle ? raffleOptions : groupOptions
   // Wheel is revealed once result is shown
   const wheelRevealed = showResult
-  // In raffle mode, block spin until players have loaded. Group mode is always ready.
-  const optionsReady  = isRaffle ? raffleOptions.length > 0 : groupOptions.length > 0
+  // Ready to spin once WS init received and options are populated
+  const optionsReady  = wsReady && wheelOptions.length > 0
 
   return (
     <div style={s.page}>
@@ -180,7 +180,7 @@ export default function RoomPage() {
                 opacity: spinning ? 0.7 : 1,
               }}
             >
-              {spinning ? '⏳ Girando...' : hasSpun ? '✓ Girado — esperando a los demás' : '🎡 Girar ruleta'}
+              {spinning ? '⏳ Girando...' : hasSpun ? '✓ Girado — esperando a los demás' : !wsReady ? '⏳ Conectando...' : !optionsReady ? '⏳ Cargando jugadores...' : '🎡 Girar ruleta'}
             </button>
           )}
 
