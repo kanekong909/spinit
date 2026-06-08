@@ -145,16 +145,56 @@ export default function WelcomePage() {
         )}
       </div>
 
-      <style>{`
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: none; }
+     <style>{`
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(25px);
+          filter: blur(2px);
         }
-        @keyframes spinSlow {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+          filter: blur(0);
         }
-      `}</style>
+      }
+      @keyframes spinSlow {
+        from { transform: translate(-50%, -50%) rotate(0deg); }
+        to   { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+      @keyframes neonPulse {
+        0% { opacity: 0.6; text-shadow: 0 0 2px #00ffff; }
+        100% { opacity: 1; text-shadow: 0 0 10px #00ffff, 0 0 5px #ff00ff; }
+      }
+      button {
+        transition: all 0.15s ease;
+      }
+      .btnPrimary:hover {
+        background: #00ffff;
+        color: #000;
+        box-shadow: 0 0 20px #00ffff;
+        border-color: #00ffff;
+      }
+      .btnSecondary:hover {
+        background: #ff00ff;
+        color: #000;
+        box-shadow: 0 0 20px #ff00ff;
+        border-color: #ff00ff;
+      }
+      .skipBtn:hover {
+        color: #00ffff;
+        border-color: #00ffff;
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+      }
+      .summaryItem:hover {
+        border-color: #ff00ff;
+        box-shadow: 0 0 12px rgba(255, 0, 255, 0.3);
+        transform: translateX(4px);
+      }
+      .stepCard {
+        animation: neonPulse 1.5s ease-in-out infinite alternate;
+      }
+    `}</style>
     </div>
   )
 }
@@ -162,9 +202,14 @@ export default function WelcomePage() {
 const s = {
   page: {
     minHeight: '100vh',
-    background: '#0f0f0f',
-    color: 'white',
-    fontFamily: "'DM Sans', sans-serif",
+    background: '#0a0a0f',
+    backgroundImage: `
+      repeating-linear-gradient(45deg, rgba(0, 255, 255, 0.02) 0px, rgba(0, 255, 255, 0.02) 2px, transparent 2px, transparent 8px),
+      repeating-linear-gradient(135deg, rgba(255, 0, 255, 0.02) 0px, rgba(255, 0, 255, 0.02) 2px, transparent 2px, transparent 12px),
+      radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.08) 0%, transparent 50%)
+    `,
+    color: '#00ffff',
+    fontFamily: "'Rajdhani', 'Segoe UI', monospace",
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -173,15 +218,18 @@ const s = {
   },
   bgWheel: {
     position: 'absolute',
-    width: 600,
-    height: 600,
+    width: 800,
+    height: 800,
     borderRadius: '50%',
     top: '50%',
     left: '50%',
-    transform: 'translate(-50%,-50%)',
+    transform: 'translate(-50%, -50%)',
     overflow: 'hidden',
-    animation: 'spinSlow 60s linear infinite',
+    animation: 'spinSlow 40s linear infinite',
     pointerEvents: 'none',
+    opacity: 0.25,
+    border: '1px solid rgba(0, 255, 255, 0.2)',
+    boxShadow: '0 0 30px rgba(0, 255, 255, 0.1), inset 0 0 40px rgba(0, 255, 255, 0.05)',
   },
   bgSlice: {
     position: 'absolute',
@@ -193,134 +241,171 @@ const s = {
   },
   inner: {
     position: 'relative',
-    zIndex: 1,
+    zIndex: 2,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     gap: '2rem',
-    padding: '2rem 1rem',
+    padding: '2rem 1.5rem',
     width: '100%',
-    maxWidth: 460,
+    maxWidth: 520,
     textAlign: 'center',
   },
   logoWrap: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
   },
   logo: {
-    fontFamily: "'Syne', sans-serif",
-    fontSize: 'clamp(52px, 12vw, 72px)',
-    fontWeight: 800,
-    letterSpacing: '-2px',
-    lineHeight: 1,
+    fontFamily: "'Orbitron', 'Rajdhani', monospace",
+    fontSize: 'clamp(58px, 14vw, 88px)',
+    fontWeight: 900,
+    letterSpacing: '4px',
+    textShadow: '0 0 5px #00ffff, 0 0 15px #00ffff, 0 0 30px #00ffff80, 0 0 60px #ff00ff40',
+    background: 'linear-gradient(135deg, #00ffff, #ff00ff)',
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
+    lineHeight: 1.1,
   },
   tagline: {
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.4)',
-    letterSpacing: '0.3px',
+    fontSize: 13,
+    color: '#ff00ff',
+    letterSpacing: '3px',
+    fontWeight: 500,
+    textTransform: 'uppercase',
+    textShadow: '0 0 5px #ff00ff',
+    fontFamily: "'Rajdhani', monospace",
   },
   stepCard: {
     width: '100%',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20,
+    background: 'rgba(0, 0, 0, 0.65)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid #00ffff',
+    borderRadius: 8,
     padding: '2rem 1.75rem',
+    boxShadow: '0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.05)',
+    transition: 'all 0.2s ease',
   },
   stepDots: {
     display: 'flex',
-    gap: 6,
+    gap: 10,
     justifyContent: 'center',
-    marginBottom: '1.5rem',
+    marginBottom: '1.75rem',
     alignItems: 'center',
   },
   dot: {
-    height: 6,
-    borderRadius: 3,
-    transition: 'all 0.3s ease',
+    height: 4,
+    borderRadius: 2,
+    transition: 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)',
+    background: '#ff00ff',
   },
   stepIcon: {
-    fontSize: 44,
-    marginBottom: 12,
+    fontSize: 54,
+    marginBottom: 16,
     display: 'block',
+    filter: 'drop-shadow(0 0 8px #00ffff) drop-shadow(0 0 4px #ff00ff)',
   },
   stepTitle: {
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Orbitron', monospace",
     fontWeight: 700,
     fontSize: 20,
-    marginBottom: 10,
-    lineHeight: 1.2,
+    marginBottom: 12,
+    lineHeight: 1.3,
+    letterSpacing: '1px',
+    textShadow: '0 0 3px #00ffff',
+    color: '#00ffff',
   },
   stepDesc: {
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.5)',
-    lineHeight: 1.6,
+    fontSize: 14,
+    color: 'rgba(0, 255, 255, 0.7)',
+    lineHeight: 1.55,
+    fontFamily: "'Rajdhani', sans-serif",
+    fontWeight: 500,
   },
   summaryGrid: {
     width: '100%',
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: 8,
+    gap: 12,
   },
   summaryItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: 10,
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: 12,
-    padding: '10px 14px',
+    gap: 12,
+    background: 'rgba(0, 0, 0, 0.7)',
+    border: '1px solid rgba(0, 255, 255, 0.4)',
+    borderRadius: 6,
+    padding: '12px 14px',
     textAlign: 'left',
+    transition: 'all 0.2s',
+    cursor: 'default',
   },
   summaryIcon: {
-    fontSize: 22,
+    fontSize: 26,
     flexShrink: 0,
+    filter: 'drop-shadow(0 0 4px #ff00ff)',
   },
   summaryText: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.55)',
-    lineHeight: 1.3,
-    fontWeight: 500,
+    color: '#00ffff',
+    lineHeight: 1.35,
+    fontWeight: 600,
+    letterSpacing: '0.5px',
+    fontFamily: "'Rajdhani', monospace",
   },
   ctaWrap: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: 14,
     width: '100%',
   },
   btnPrimary: {
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Orbitron', monospace",
     fontWeight: 700,
     fontSize: 16,
-    background: '#D85A30',
-    color: 'white',
-    border: 'none',
-    borderRadius: 12,
-    padding: '14px',
+    letterSpacing: '2px',
+    background: 'transparent',
+    color: '#00ffff',
+    border: '2px solid #00ffff',
+    borderRadius: 0,
+    padding: '14px 20px',
     cursor: 'pointer',
     width: '100%',
-    letterSpacing: '0.2px',
+    textTransform: 'uppercase',
+    boxShadow: '0 0 8px rgba(0, 255, 255, 0.5), inset 0 0 4px rgba(0, 255, 255, 0.3)',
+    transition: 'all 0.2s',
   },
   btnSecondary: {
-    fontFamily: "'Syne', sans-serif",
-    fontWeight: 700,
-    fontSize: 15,
-    background: 'rgba(255,255,255,0.05)',
-    color: 'rgba(255,255,255,0.6)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    padding: '13px',
+    fontFamily: "'Orbitron', monospace",
+    fontWeight: 600,
+    fontSize: 14,
+    letterSpacing: '1.5px',
+    background: 'transparent',
+    color: '#ff00ff',
+    border: '2px solid #ff00ff',
+    borderRadius: 0,
+    padding: '13px 20px',
     cursor: 'pointer',
     width: '100%',
+    textTransform: 'uppercase',
+    boxShadow: '0 0 6px rgba(255, 0, 255, 0.4), inset 0 0 2px rgba(255, 0, 255, 0.2)',
+    transition: 'all 0.2s',
   },
   skipBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'rgba(255,255,255,0.2)',
-    fontSize: 13,
+    background: 'transparent',
+    border: '1px solid rgba(0, 255, 255, 0.4)',
+    borderRadius: 0,
+    color: 'rgba(0, 255, 255, 0.6)',
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: '2px',
     cursor: 'pointer',
-    fontFamily: "'DM Sans', sans-serif",
-    padding: '4px 8px',
+    fontFamily: "'Rajdhani', monospace",
+    padding: '6px 16px',
+    marginTop: 8,
+    transition: 'all 0.2s',
+    textTransform: 'uppercase',
   },
 }

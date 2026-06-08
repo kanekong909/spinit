@@ -205,6 +205,47 @@ export default function HomePage() {
           <Link to="/admin" style={{ fontSize: 11, color: 'rgba(255,255,255,0.15)', textDecoration: 'none' }}>admin</Link>
         </p>
       </div>
+
+      <style>{`
+        @keyframes neonPulse {
+          0% { border-color: rgba(0, 255, 255, 0.3); box-shadow: 0 0 0px rgba(0, 255, 255, 0); }
+          100% { border-color: rgba(0, 255, 255, 0.8); box-shadow: 0 0 12px rgba(0, 255, 255, 0.3); }
+        }
+        
+        input:focus, textarea:focus {
+          border-color: #00ffff !important;
+          box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+          outline: none;
+        }
+        
+        button:active {
+          transform: scale(0.97);
+        }
+        
+        .backBtn:hover {
+          background: rgba(0, 255, 255, 0.1);
+          border-color: #00ffff;
+          box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+        }
+        
+        .roomBtn:hover {
+          border-color: #ff00ff;
+          background: rgba(255, 0, 255, 0.05);
+          box-shadow: 0 0 12px rgba(255, 0, 255, 0.2);
+          transform: translateX(4px);
+        }
+        
+        button[type="submit"]:hover {
+          background: #00ffff;
+          color: #0a0a0f;
+          box-shadow: 0 0 20px #00ffff;
+          border-color: #00ffff;
+        }
+        
+        .tab:hover {
+          color: #ff00ff;
+        }
+      `}</style>
     </div>
   )
 }
@@ -212,15 +253,25 @@ export default function HomePage() {
 const s = {
   page: {
     minHeight: '100vh',
-    background: '#0f0f0f',
-    color: 'white',
-    fontFamily: "'DM Sans', sans-serif",
+    background: '#0a0a0f',
+    backgroundImage: `
+      repeating-linear-gradient(45deg, rgba(0, 255, 255, 0.02) 0px, rgba(0, 255, 255, 0.02) 2px, transparent 2px, transparent 8px),
+      repeating-linear-gradient(135deg, rgba(255, 0, 255, 0.02) 0px, rgba(255, 0, 255, 0.02) 2px, transparent 2px, transparent 12px),
+      radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.06) 0%, transparent 60%)
+    `,
+    color: '#00ffff',
+    fontFamily: "'Rajdhani', 'DM Sans', sans-serif",
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'center',
     padding: '2rem 1rem',
   },
-  inner: { width: '100%', maxWidth: 420 },
+  inner: {
+    width: '100%',
+    maxWidth: 440,
+    position: 'relative',
+    zIndex: 2,
+  },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -228,104 +279,133 @@ const s = {
     marginBottom: '1.5rem',
   },
   logo: {
-    fontFamily: "'Syne', sans-serif",
-    fontSize: 26,
-    fontWeight: 800,
+    fontFamily: "'Orbitron', 'Syne', monospace",
+    fontSize: 28,
+    fontWeight: 900,
+    letterSpacing: '2px',
+    textShadow: '0 0 5px #00ffff, 0 0 10px #00ffff80',
+    background: 'linear-gradient(135deg, #00ffff, #ff00ff)',
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
   },
   backBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: 13,
+    background: 'transparent',
+    border: '1px solid rgba(0, 255, 255, 0.3)',
+    borderRadius: 4,
+    color: '#00ffff',
+    fontSize: 12,
     cursor: 'pointer',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Rajdhani', monospace",
+    padding: '5px 12px',
+    letterSpacing: '1px',
+    transition: 'all 0.15s',
   },
   tabs: {
     display: 'flex',
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.07)',
-    borderRadius: 12,
+    background: 'rgba(0, 0, 0, 0.6)',
+    border: '1px solid rgba(0, 255, 255, 0.25)',
+    borderRadius: 6,
     padding: 4,
     marginBottom: '1.5rem',
     gap: 4,
   },
   tab: {
     flex: 1,
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Orbitron', monospace",
     fontWeight: 700,
-    fontSize: 13,
+    fontSize: 12,
+    letterSpacing: '1px',
     background: 'none',
     border: 'none',
-    color: 'rgba(255,255,255,0.35)',
-    borderRadius: 8,
-    padding: '9px',
+    color: 'rgba(0, 255, 255, 0.4)',
+    borderRadius: 4,
+    padding: '8px',
     cursor: 'pointer',
     transition: 'all 0.15s',
+    textTransform: 'uppercase',
   },
   tabActive: {
-    background: 'rgba(216,90,48,0.15)',
-    color: '#D85A30',
-    border: '1px solid rgba(216,90,48,0.25)',
+    background: 'rgba(0, 255, 255, 0.1)',
+    color: '#00ffff',
+    border: '1px solid rgba(0, 255, 255, 0.4)',
+    boxShadow: '0 0 8px rgba(0, 255, 255, 0.2)',
   },
   sectionLabel: {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.3)',
-    fontWeight: 500,
+    fontSize: 10,
+    color: '#ff00ff',
+    fontWeight: 600,
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    letterSpacing: '2px',
     marginBottom: 8,
+    textShadow: '0 0 3px #ff00ff',
   },
-  row: { display: 'flex', gap: 8 },
+  row: {
+    display: 'flex',
+    gap: 8,
+  },
   input: {
     fontSize: 14,
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 10,
+    background: 'rgba(0, 0, 0, 0.7)',
+    border: '1px solid rgba(0, 255, 255, 0.3)',
+    borderRadius: 4,
     padding: '11px 14px',
-    color: 'white',
+    color: '#00ffff',
     outline: 'none',
     boxSizing: 'border-box',
-    transition: 'border-color 0.15s',
+    transition: 'all 0.15s',
+    fontFamily: "'Rajdhani', monospace",
   },
   btnPrimary: {
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Orbitron', monospace",
     fontWeight: 700,
-    fontSize: 15,
-    background: '#D85A30',
-    color: 'white',
-    border: 'none',
-    borderRadius: 10,
-    padding: '11px 22px',
+    fontSize: 14,
+    letterSpacing: '1.5px',
+    background: 'transparent',
+    color: '#00ffff',
+    border: '2px solid #00ffff',
+    borderRadius: 4,
+    padding: '10px 22px',
     cursor: 'pointer',
-    transition: 'opacity 0.15s',
+    transition: 'all 0.15s',
+    textTransform: 'uppercase',
   },
   tag: {
-    fontSize: 12,
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20,
+    fontSize: 11,
+    background: 'rgba(0, 255, 255, 0.08)',
+    border: '1px solid rgba(0, 255, 255, 0.25)',
+    borderRadius: 2,
     padding: '3px 10px',
-    color: 'rgba(255,255,255,0.5)',
+    color: '#00ffff',
+    fontFamily: "'Rajdhani', monospace",
+    letterSpacing: '0.5px',
   },
-  roomList: { display: 'flex', flexDirection: 'column', gap: 6 },
+  roomList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  },
   roomBtn: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    background: 'rgba(255,255,255,0.03)',
-    border: '1px solid rgba(255,255,255,0.07)',
-    borderRadius: 10,
+    background: 'rgba(0, 0, 0, 0.6)',
+    border: '1px solid rgba(0, 255, 255, 0.2)',
+    borderRadius: 4,
     padding: '10px 14px',
-    color: 'white',
+    color: '#00ffff',
     cursor: 'pointer',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Rajdhani', sans-serif",
     textAlign: 'left',
+    transition: 'all 0.15s',
   },
   error: {
-    color: '#F09595',
-    fontSize: 13,
+    color: '#ff00ff',
+    fontSize: 12,
     marginTop: '0.75rem',
     textAlign: 'center',
+    textShadow: '0 0 3px #ff00ff',
+    letterSpacing: '0.5px',
   },
 }

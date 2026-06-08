@@ -164,6 +164,42 @@ export default function JoinPage() {
           </button>
         </form>
       </div>
+
+      <style>{`
+        @keyframes neonPulse {
+          0% { border-color: rgba(0, 255, 255, 0.3); box-shadow: 0 0 0px rgba(0, 255, 255, 0); }
+          100% { border-color: rgba(0, 255, 255, 0.8); box-shadow: 0 0 12px rgba(0, 255, 255, 0.3); }
+        }
+        
+        input:focus {
+          border-color: #00ffff !important;
+          box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+          outline: none;
+        }
+        
+        button:active {
+          transform: scale(0.97);
+        }
+        
+        .styleBtn:hover {
+          border-color: #ff00ff !important;
+          box-shadow: 0 0 12px rgba(255, 0, 255, 0.4);
+          transform: scale(1.05);
+        }
+        
+        button[type="submit"]:hover {
+          background: #00ffff;
+          color: #0a0a0f;
+          box-shadow: 0 0 20px #00ffff;
+          border-color: #00ffff;
+        }
+        
+        .backBtn:hover {
+          background: rgba(0, 255, 255, 0.1);
+          border-color: #00ffff;
+          box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+        }
+      `}</style>
     </div>
   )
 }
@@ -171,110 +207,136 @@ export default function JoinPage() {
 const styles = {
   page: {
     minHeight: '100vh',
-    background: '#0f0f0f',
+    background: '#0a0a0f',
+    backgroundImage: `
+      repeating-linear-gradient(45deg, rgba(0, 255, 255, 0.02) 0px, rgba(0, 255, 255, 0.02) 2px, transparent 2px, transparent 8px),
+      repeating-linear-gradient(135deg, rgba(255, 0, 255, 0.02) 0px, rgba(255, 0, 255, 0.02) 2px, transparent 2px, transparent 12px),
+      radial-gradient(circle at 70% 20%, rgba(0, 255, 255, 0.06) 0%, transparent 60%)
+    `,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     padding: '1rem',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Rajdhani', 'DM Sans', sans-serif",
   },
   card: {
-    background: '#1a1a1a',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20,
+    background: 'rgba(0, 0, 0, 0.65)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(0, 255, 255, 0.35)',
+    borderRadius: 8,
     padding: '2rem',
     width: '100%',
     maxWidth: 440,
-    color: 'white',
+    color: '#00ffff',
+    boxShadow: '0 0 30px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.02)',
   },
   logo: {
-    fontFamily: "'Syne', sans-serif",
-    fontSize: 32,
-    fontWeight: 800,
+    fontFamily: "'Orbitron', 'Syne', monospace",
+    fontSize: 34,
+    fontWeight: 900,
+    letterSpacing: '2px',
     textAlign: 'center',
     marginBottom: 4,
+    textShadow: '0 0 5px #00ffff, 0 0 10px #00ffff80',
+    background: 'linear-gradient(135deg, #00ffff, #ff00ff)',
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
   },
   subtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    color: 'rgba(0, 255, 255, 0.6)',
     textAlign: 'center',
     marginBottom: '1.5rem',
+    letterSpacing: '0.5px',
   },
   roomBadge: {
     textAlign: 'center',
-    fontSize: 13,
-    background: 'rgba(216,90,48,0.15)',
-    border: '1px solid rgba(216,90,48,0.3)',
-    borderRadius: 20,
-    padding: '4px 16px',
-    color: '#D85A30',
+    fontSize: 12,
+    background: 'rgba(0, 255, 255, 0.08)',
+    border: '1px solid rgba(0, 255, 255, 0.3)',
+    borderRadius: 4,
+    padding: '5px 16px',
+    color: '#00ffff',
     marginBottom: '1.5rem',
-    fontWeight: 500,
+    fontWeight: 600,
+    letterSpacing: '1px',
+    fontFamily: "'Rajdhani', monospace",
   },
   avatarPreview: {
     textAlign: 'center',
     marginBottom: '1.25rem',
   },
   label: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.45)',
-    fontWeight: 500,
-    letterSpacing: '0.5px',
+    fontSize: 10,
+    color: '#ff00ff',
+    fontWeight: 600,
+    letterSpacing: '2px',
     textTransform: 'uppercase',
     marginBottom: 10,
+    textShadow: '0 0 3px #ff00ff',
   },
   stylePicker: {
     display: 'flex',
-    gap: 8,
+    gap: 10,
     flexWrap: 'wrap',
     marginBottom: '1.25rem',
+    justifyContent: 'center',
   },
   styleBtn: {
-    background: 'rgba(255,255,255,0.05)',
+    background: 'rgba(0, 0, 0, 0.6)',
     borderRadius: '50%',
     cursor: 'pointer',
     padding: 2,
-    transition: 'border-color 0.15s, transform 0.1s',
+    transition: 'all 0.15s',
   },
   input: {
     width: '100%',
     fontSize: 16,
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: 10,
+    background: 'rgba(0, 0, 0, 0.7)',
+    border: '1px solid rgba(0, 255, 255, 0.3)',
+    borderRadius: 4,
     padding: '12px 14px',
-    color: 'white',
-    fontFamily: "'DM Sans', sans-serif",
+    color: '#00ffff',
+    fontFamily: "'Rajdhani', monospace",
     marginBottom: '1rem',
     boxSizing: 'border-box',
     outline: 'none',
+    transition: 'all 0.15s',
   },
   btn: {
     width: '100%',
-    fontFamily: "'Syne', sans-serif",
+    fontFamily: "'Orbitron', monospace",
     fontWeight: 700,
-    fontSize: 15,
-    background: '#D85A30',
-    color: 'white',
-    border: 'none',
-    borderRadius: 10,
-    padding: '13px',
+    fontSize: 14,
+    letterSpacing: '1.5px',
+    background: 'transparent',
+    color: '#00ffff',
+    border: '2px solid #00ffff',
+    borderRadius: 4,
+    padding: '12px',
     cursor: 'pointer',
-    transition: 'opacity 0.15s',
+    transition: 'all 0.15s',
+    textTransform: 'uppercase',
   },
   backBtn: {
-    background: 'none',
-    border: 'none',
-    color: 'rgba(255,255,255,0.3)',
-    fontSize: 13,
+    background: 'transparent',
+    border: '1px solid rgba(0, 255, 255, 0.3)',
+    borderRadius: 4,
+    color: '#00ffff',
+    fontSize: 12,
     cursor: 'pointer',
-    fontFamily: "'DM Sans', sans-serif",
-    padding: '4px 0',
+    fontFamily: "'Rajdhani', monospace",
+    padding: '5px 12px',
+    letterSpacing: '1px',
+    transition: 'all 0.15s',
   },
   error: {
-    color: '#F09595',
-    fontSize: 13,
+    color: '#ff00ff',
+    fontSize: 12,
     marginBottom: '0.75rem',
     textAlign: 'center',
-  }
+    textShadow: '0 0 3px #ff00ff',
+    letterSpacing: '0.5px',
+  },
 }
