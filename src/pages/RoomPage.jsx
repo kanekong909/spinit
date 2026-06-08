@@ -71,7 +71,8 @@ export default function RoomPage() {
   }, [room?.status])
 
   function handleSpin() {
-    if (spinning || hasSpun || room?.status !== 'spinning' || !optionsReady) return
+    if (spinning || hasSpun || room?.status !== 'spinning') return
+    if (!optionsReady) return
     setSpinning(true)
     wheelRef.current?.spin((spinResult) => {
       setSpinning(false)
@@ -106,15 +107,15 @@ export default function RoomPage() {
   const progressPct   = totalOnline > 0 ? Math.round((spunCount / totalOnline) * 100) : 0
   const isOwner       = me?.is_owner || room?.owner_id === me?.id
   const isRaffle      = room.mode === 'raffle'
-  // In raffle mode the wheel sectors ARE the player names (never fall back to placeholder)
+  // In raffle mode the wheel sectors ARE the player names
   const raffleOptions = onlinePlayers.map(p => p.name)
-  const wheelOptions  = isRaffle
-    ? (raffleOptions.length > 0 ? raffleOptions : null)  // null = not ready yet
-    : room.options.filter(o => o !== 'sorteo')           // strip placeholder if present
+  // Group mode: use room.options (strip 'sorteo' placeholder just in case)
+  const groupOptions  = room.options.filter(o => o !== 'sorteo')
+  const wheelOptions  = isRaffle ? raffleOptions : groupOptions
   // Wheel is revealed once result is shown
   const wheelRevealed = showResult
-  // Block spin until we have valid options
-  const optionsReady  = wheelOptions && wheelOptions.length > 0
+  // In raffle mode, block spin until players have loaded. Group mode is always ready.
+  const optionsReady  = isRaffle ? raffleOptions.length > 0 : groupOptions.length > 0
 
   return (
     <div style={s.page}>
@@ -160,7 +161,7 @@ export default function RoomPage() {
           <div style={{ ...s.wheelWrap, marginBottom: 44 /* space for hidden label */ }}>
             <Wheel
               ref={wheelRef}
-              options={wheelOptions || ['...']}
+              options={wheelOptions.length > 0 ? wheelOptions : ['?']}
               revealed={wheelRevealed}
             />
           </div>
