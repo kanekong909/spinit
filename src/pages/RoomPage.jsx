@@ -250,10 +250,9 @@ export default function RoomPage() {
               {/* Raffle mode — drumroll phase */}
               {isRaffle && rafflePhase === 'drumroll' && (
                 <>
-                  <p style={s.resultLabel}>🎰 Opción ganadora</p>
-                  <p style={s.resultValue}>{result.winner}</p>
-                  <p style={{ ...s.resultMeta, color: '#D85A30', animation: 'pulse 0.6s ease-in-out infinite' }}>
-                    🥁 Sorteando ganador...
+                  <p style={s.resultLabel}>🎰 Sorteo en curso</p>
+                  <p style={{ ...s.resultMeta, color: '#D85A30', fontSize: 15, margin: '12px 0', animation: 'pulse 0.6s ease-in-out infinite' }}>
+                    🥁 Eligiendo al ganador...
                   </p>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 8 }}>
                     {[0,1,2].map(i => (
@@ -270,34 +269,30 @@ export default function RoomPage() {
               {isRaffle && rafflePhase === 'winner' && result.raffle_winner_id && (
                 <>
                   <p style={s.resultLabel}>🏆 {room.prize || 'Ganador del sorteo'}</p>
-                  {/* Big winner avatar */}
                   <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0', animation: 'fadeUp 0.5s ease' }}>
                     <div style={{
-                      width: 80, height: 80,
-                      borderRadius: '50%',
-                      border: '3px solid #D85A30',
-                      overflow: 'hidden',
+                      width: 80, height: 80, borderRadius: '50%',
+                      border: '3px solid #D85A30', overflow: 'hidden',
                       boxShadow: '0 0 0 6px rgba(216,90,48,0.15)',
                     }}
                       dangerouslySetInnerHTML={{ __html: avatarSVG(result.raffle_winner_avatar_style, result.raffle_winner_avatar_seed, 80) }}
                     />
                   </div>
-                  <p style={{ ...s.resultValue, fontSize: 24 }}>{result.raffle_winner_name}</p>
+                  <p style={{ ...s.resultValue, fontSize: 26 }}>{result.raffle_winner_name}</p>
                   <p style={s.resultMeta}>
-                    Cayó en el sector <strong style={{ color: '#D85A30' }}>{result.winner}</strong>
-                    {result.raffle_tiebreak && ' · Sorteado entre varios ganadores'}
+                    {result.raffle_tiebreak
+                      ? '¡Sorteado entre varios que cayeron en el mismo sector!'
+                      : '¡Fue el único en caer en su sector!'}
                   </p>
-                  <VoteBreakdown result={result} />
                 </>
               )}
 
-              {/* Raffle mode — no winner (no one landed on winning option) */}
+              {/* Raffle mode — no winner */}
               {isRaffle && rafflePhase === 'winner' && !result.raffle_winner_id && (
                 <>
-                  <p style={s.resultLabel}>🎰 Resultado</p>
-                  <p style={s.resultValue}>{result.winner}</p>
-                  <p style={s.resultMeta}>Nadie cayó en esta opción</p>
-                  <VoteBreakdown result={result} />
+                  <p style={s.resultLabel}>🎰 Sin ganador</p>
+                  <p style={s.resultValue}>—</p>
+                  <p style={s.resultMeta}>Nadie cayó en el sector sorteado</p>
                 </>
               )}
 
