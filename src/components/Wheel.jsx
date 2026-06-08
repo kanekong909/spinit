@@ -1,10 +1,16 @@
 import { useEffect, useRef, useImperativeHandle, forwardRef, useState } from 'react'
 
 const COLORS = [
-  '#D85A30','#1D9E75','#378ADD','#BA7517',
-  '#993556','#534AB7','#3B6D11','#5DCAA5'
+  '#00ffff',  // Cyan neón
+  '#ff00ff',  // Magenta neón
+  '#00ff88',  // Verde neón
+  '#ffaa00',  // Amarillo neón
+  '#aa00ff',  // Púrpura neón
+  '#ff4400',  // Naranja neón
+  '#00ccff',  // Azul neón
+  '#ff0066'   // Rosa neón
 ]
-const PATTERNS = ['░','▓','▒','◈','◆','◇','▪','▫']
+const PATTERNS = ['◈', '◆', '◉', '⬟', '◓', '◒', '◐', '◑']
 
 // Pointer is at the TOP (12 o'clock = -π/2 in canvas coords).
 // We start the wheel rotated so sector 0 is centered under the pointer.
@@ -47,9 +53,12 @@ const Wheel = forwardRef(function Wheel({ options, revealed = false }, ref) {
       ctx.arc(cx, cy, r, start, end)
       ctx.fillStyle = COLORS[i % COLORS.length]
       ctx.fill()
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)'
-      ctx.lineWidth = 2
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)'
+      ctx.lineWidth = 1.5
+      ctx.shadowBlur = 2
+      ctx.shadowColor = '#00ffff'
       ctx.stroke()
+      ctx.shadowBlur = 0
 
       ctx.save()
       ctx.translate(cx, cy)
@@ -57,36 +66,42 @@ const Wheel = forwardRef(function Wheel({ options, revealed = false }, ref) {
 
       if (showText) {
         ctx.textAlign = 'right'
-        ctx.fillStyle = 'rgba(255,255,255,0.95)'
-        const fs = options.length > 6 ? 11 : 13
-        ctx.font = `600 ${fs}px 'DM Sans', sans-serif`
+        ctx.fillStyle = '#ffffff'
+        ctx.shadowBlur = 3
+        ctx.shadowColor = '#00ffff'
+        const fs = options.length > 6 ? 12 : 14
+        ctx.font = `600 ${fs}px 'Rajdhani', 'DM Sans', sans-serif`
         const label = opt.length > 12 ? opt.slice(0, 12) + '…' : opt
         ctx.fillText(label, r - 12, 5)
+        ctx.shadowBlur = 0
       } else {
         ctx.textAlign = 'center'
-        ctx.fillStyle = 'rgba(255,255,255,0.22)'
-        ctx.font = `bold 15px monospace`
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)'
+        ctx.font = `bold 16px monospace`
         ctx.fillText(PATTERNS[i % PATTERNS.length], r * 0.62, 5)
-        ctx.fillStyle = 'rgba(255,255,255,0.13)'
-        ctx.font = `bold 10px sans-serif`
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)'
+        ctx.font = `bold 10px 'Orbitron', monospace`
         ctx.fillText('?', r - 15, 5)
       }
       ctx.restore()
     })
 
-    // Center circle
+    // Center circle - estilo neón
     ctx.beginPath()
-    ctx.arc(cx, cy, 20, 0, 2 * Math.PI)
-    ctx.fillStyle = '#1a1a1a'
+    ctx.arc(cx, cy, 22, 0, 2 * Math.PI)
+    ctx.fillStyle = '#0a0a0f'
     ctx.fill()
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)'
+    ctx.strokeStyle = '#00ffff'
     ctx.lineWidth = 2
     ctx.stroke()
-    ctx.fillStyle = 'rgba(255,255,255,0.45)'
-    ctx.font = `bold 13px sans-serif`
+    ctx.shadowBlur = 8
+    ctx.shadowColor = '#00ffff'
+    ctx.fillStyle = '#00ffff'
+    ctx.font = `bold 14px 'Orbitron', monospace`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(showText ? '★' : '?', cx, cy)
+    ctx.shadowBlur = 0
     ctx.textBaseline = 'alphabetic'
   }
 
@@ -155,36 +170,51 @@ const Wheel = forwardRef(function Wheel({ options, revealed = false }, ref) {
   const scaleX = Math.cos((flipAngle * Math.PI) / 180)
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
-      {/* Pointer */}
+    <div style={{
+      position: 'relative',
+      display: 'inline-block',
+      filter: revealed ? 'drop-shadow(0 0 15px rgba(0, 255, 255, 0.3))' : 'none',
+      transition: 'filter 0.5s ease',
+    }}>
+      {/* Pointer - estilo neón */}
       <div style={{
-        position: 'absolute', top: -12, left: '50%',
+        position: 'absolute', top: -14, left: '50%',
         transform: 'translateX(-50%)',
         width: 0, height: 0,
-        borderLeft: '10px solid transparent',
-        borderRight: '10px solid transparent',
-        borderTop: '22px solid #D85A30',
+        borderLeft: '12px solid transparent',
+        borderRight: '12px solid transparent',
+        borderTop: '24px solid #00ffff',
         zIndex: 10,
-        filter: 'drop-shadow(0 2px 6px rgba(216,90,48,0.5))',
+        filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.7)) drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
       }} />
 
       <div style={{ transform: `scaleX(${scaleX})`, display: 'inline-block' }}>
         <canvas
           ref={canvasRef}
           width={280} height={280}
-          style={{ borderRadius: '50%', display: 'block' }}
+          style={{
+            borderRadius: '50%',
+            display: 'block',
+            boxShadow: '0 0 20px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.05)',
+            border: '1px solid rgba(0, 255, 255, 0.3)',
+          }}
         />
       </div>
 
       {!revealed && (
         <div style={{
-          position: 'absolute', bottom: -28, left: '50%',
+          position: 'absolute', bottom: -32, left: '50%',
           transform: 'translateX(-50%)',
-          whiteSpace: 'nowrap', fontSize: 11,
-          color: 'rgba(255,255,255,0.2)',
-          display: 'flex', alignItems: 'center', gap: 4,
+          whiteSpace: 'nowrap', fontSize: 10,
+          color: '#ff00ff',
+          textTransform: 'uppercase',
+          letterSpacing: '1.5px',
+          display: 'flex', alignItems: 'center', gap: 6,
+          fontFamily: "'Orbitron', monospace",
+          textShadow: '0 0 3px #ff00ff',
         }}>
-          <span>🔒</span> Opciones ocultas
+          <span style={{ fontSize: 10 }}>🔒</span> OPINIONES OCULTAS
+          <span style={{ fontSize: 10 }}>🔒</span>
         </div>
       )}
     </div>

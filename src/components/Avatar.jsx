@@ -13,29 +13,43 @@ export default function Avatar({ style = 'circle', seed = 'Player', size = 36, b
           height: size,
           borderRadius: '50%',
           overflow: 'hidden',
-          border: border ? '2px solid #D85A30' : '2px solid rgba(255,255,255,0.1)',
+          border: border 
+            ? '2px solid #00ffff' 
+            : '2px solid rgba(0, 255, 255, 0.25)',
+          boxShadow: border 
+            ? `0 0 ${Math.max(8, size * 0.15)}px rgba(0, 255, 255, 0.4)` 
+            : 'none',
           display: 'block',
           flexShrink: 0,
+          transition: 'all 0.2s ease',
         }}
       />
 
       {/* Overlay desconectado */}
       {!online && (
         <div style={{
-          position: 'absolute', inset: 0, borderRadius: '50%',
-          background: 'rgba(0,0,0,0.5)',
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '50%',
+          background: 'rgba(0, 0, 0, 0.65)',
+          backdropFilter: 'blur(2px)',
         }} />
       )}
 
-      {/* Indicador online/offline */}
+      {/* Indicador online/offline - estilo neón */}
       <div style={{
         position: 'absolute',
-        bottom: 1, right: 1,
-        width: Math.max(7, size * 0.22),
-        height: Math.max(7, size * 0.22),
+        bottom: 1,
+        right: 1,
+        width: Math.max(8, size * 0.24),
+        height: Math.max(8, size * 0.24),
         borderRadius: '50%',
-        background: online ? '#1D9E75' : '#666',
-        border: `${size > 40 ? 2 : 1.5}px solid #0f0f0f`,
+        background: online ? '#00ffff' : '#ff00ff',
+        boxShadow: online 
+          ? `0 0 ${Math.max(6, size * 0.12)}px #00ffff` 
+          : `0 0 ${Math.max(4, size * 0.1)}px #ff00ff`,
+        border: `${size > 40 ? 2 : 1.5}px solid #0a0a0f`,
+        transition: 'all 0.15s ease',
       }} />
     </div>
   )

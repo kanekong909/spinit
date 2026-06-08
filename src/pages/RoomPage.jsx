@@ -376,14 +376,60 @@ export default function RoomPage() {
       {error && <div style={s.errorToast}>{error}</div>}
 
       <style>{`
-        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
-        @keyframes pulse  { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-        @keyframes spin   { to { transform: rotate(360deg); } }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); filter: blur(2px); }
+          to { opacity: 1; transform: none; filter: blur(0); }
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(0.9); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes glowPulse {
+          0% { box-shadow: 0 0 0px rgba(0, 255, 255, 0); border-color: rgba(0, 255, 255, 0.3); }
+          100% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); border-color: #00ffff; }
+        }
+        
         @media (max-width: 640px) {
-          .room-main   { grid-template-columns: 1fr !important; }
+          .room-main { grid-template-columns: 1fr !important; }
           .room-sidebar { margin-top: 1.5rem; }
-          .wheel-col   { padding-bottom: 2rem; }
+          .wheel-col { padding-bottom: 2rem; }
           .result-card { max-width: 100% !important; }
+        }
+        
+        .backBtn:hover {
+          background: rgba(0, 255, 255, 0.1);
+          border-color: #00ffff;
+          box-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+        }
+        
+        .ownerBtn:hover {
+          background: #00ffff;
+          color: #0a0a0f;
+          box-shadow: 0 0 12px #00ffff;
+          border-color: #00ffff;
+        }
+        
+        button[style*="background: #D85A30"]:hover {
+          background: #00ffff !important;
+          box-shadow: 0 0 20px #00ffff;
+        }
+        
+        .playerRow:hover {
+          border-color: rgba(0, 255, 255, 0.3) !important;
+          background: rgba(0, 255, 255, 0.05) !important;
+        }
+        
+        .optionTag:hover {
+          border-color: #ff00ff !important;
+          color: #ff00ff !important;
+          box-shadow: 0 0 6px rgba(255, 0, 255, 0.3);
+        }
+        
+        .result-card {
+          animation: glowPulse 1.5s ease-in-out infinite alternate;
         }
       `}</style>
     </div>
@@ -419,162 +465,322 @@ function VoteBreakdown({ result }) {
 const s = {
   page: {
     minHeight: '100vh',
-    background: '#0f0f0f',
-    color: 'white',
-    fontFamily: "'DM Sans', sans-serif",
+    background: '#0a0a0f',
+    backgroundImage: `
+      repeating-linear-gradient(45deg, rgba(0, 255, 255, 0.02) 0px, rgba(0, 255, 255, 0.02) 2px, transparent 2px, transparent 8px),
+      repeating-linear-gradient(135deg, rgba(255, 0, 255, 0.02) 0px, rgba(255, 0, 255, 0.02) 2px, transparent 2px, transparent 12px),
+      radial-gradient(circle at 20% 40%, rgba(0, 255, 255, 0.05) 0%, transparent 60%)
+    `,
+    color: '#00ffff',
+    fontFamily: "'Rajdhani', 'DM Sans', sans-serif",
     padding: '1rem',
-    maxWidth: 900,
+    maxWidth: 1000,
     margin: '0 auto',
     overflowX: 'hidden',
   },
   loading: {
-    minHeight: '100vh', background: '#0f0f0f',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    minHeight: '100vh',
+    background: '#0a0a0f',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   spinner: {
-    width: 32, height: 32,
-    border: '3px solid rgba(255,255,255,0.08)',
-    borderTop: '3px solid #D85A30',
+    width: 40,
+    height: 40,
+    border: '3px solid rgba(0, 255, 255, 0.15)',
+    borderTop: '3px solid #00ffff',
     borderRadius: '50%',
     animation: 'spin 0.8s linear infinite',
+    boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)',
   },
   header: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: '0.75rem',
   },
-  logo: { fontFamily: "'Syne', sans-serif", fontSize: 24, fontWeight: 800 },
+  logo: {
+    fontFamily: "'Orbitron', 'Syne', monospace",
+    fontSize: 26,
+    fontWeight: 900,
+    letterSpacing: '2px',
+    textShadow: '0 0 5px #00ffff, 0 0 10px #00ffff80',
+    background: 'linear-gradient(135deg, #00ffff, #ff00ff)',
+    backgroundClip: 'text',
+    WebkitBackgroundClip: 'text',
+    color: 'transparent',
+  },
   backBtn: {
-    background: 'none',
-    border: '1px solid rgba(255,255,255,0.1)',
-    color: 'rgba(255,255,255,0.35)',
+    background: 'transparent',
+    border: '1px solid rgba(0, 255, 255, 0.3)',
+    color: '#00ffff',
     fontSize: 16,
     cursor: 'pointer',
-    borderRadius: 8,
+    borderRadius: 4,
     padding: '4px 10px',
-    fontFamily: "'DM Sans', sans-serif",
+    fontFamily: "'Rajdhani', monospace",
     lineHeight: 1,
     flexShrink: 0,
+    transition: 'all 0.15s',
   },
   codeBadge: {
-    fontSize: 13, background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20,
-    padding: '3px 12px', color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace',
+    fontSize: 12,
+    background: 'rgba(0, 0, 0, 0.6)',
+    border: '1px solid rgba(0, 255, 255, 0.3)',
+    borderRadius: 4,
+    padding: '3px 12px',
+    color: '#00ffff',
+    fontFamily: 'monospace',
+    letterSpacing: '1px',
   },
   prizeBadge: {
-    fontSize: 12, fontWeight: 600,
-    background: 'rgba(216,90,48,0.12)', border: '1px solid rgba(216,90,48,0.25)',
-    borderRadius: 20, padding: '3px 12px', color: '#D85A30',
-    maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+    fontSize: 11,
+    fontWeight: 600,
+    background: 'rgba(255, 0, 255, 0.12)',
+    border: '1px solid rgba(255, 0, 255, 0.3)',
+    borderRadius: 4,
+    padding: '3px 12px',
+    color: '#ff00ff',
+    maxWidth: 200,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    textShadow: '0 0 2px #ff00ff',
   },
   modeBadge: {
-    fontSize: 11, fontWeight: 500,
-    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 20, padding: '3px 10px', color: 'rgba(255,255,255,0.35)',
+    fontSize: 10,
+    fontWeight: 600,
+    background: 'rgba(0, 255, 255, 0.08)',
+    border: '1px solid rgba(0, 255, 255, 0.25)',
+    borderRadius: 4,
+    padding: '3px 10px',
+    color: '#00ffff',
+    letterSpacing: '1px',
   },
   statusBar: {
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: '1rem',
   },
   statusPill: {
-    display: 'inline-flex', alignItems: 'center', gap: 6,
-    fontSize: 13, fontWeight: 500, borderRadius: 20, padding: '4px 14px',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 6,
+    fontSize: 12,
+    fontWeight: 600,
+    borderRadius: 4,
+    padding: '4px 14px',
+    letterSpacing: '0.5px',
   },
   pulseDot: {
-    display: 'inline-block', width: 7, height: 7, borderRadius: '50%',
-    background: '#D85A30', animation: 'pulse 1.2s ease-in-out infinite',
+    display: 'inline-block',
+    width: 7,
+    height: 7,
+    borderRadius: '50%',
+    background: '#00ffff',
+    animation: 'pulse 1.2s ease-in-out infinite',
+    boxShadow: '0 0 5px #00ffff',
   },
   main: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(0,1fr) 260px',
+    gridTemplateColumns: 'minmax(0, 1fr) 280px',
     gap: '1.5rem',
     alignItems: 'start',
   },
   wheelCol: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem',
   },
   wheelWrap: {
-    padding: 12,
-    background: 'rgba(255,255,255,0.02)',
-    border: '1px solid rgba(255,255,255,0.05)',
+    padding: 16,
+    background: 'rgba(0, 0, 0, 0.4)',
+    border: '1px solid rgba(0, 255, 255, 0.25)',
     borderRadius: '50%',
+    boxShadow: '0 0 20px rgba(0, 255, 255, 0.1), inset 0 0 20px rgba(0, 255, 255, 0.03)',
   },
   spinBtn: {
-    fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 14,
-    padding: '12px 32px', borderRadius: 12,
-    transition: 'opacity 0.15s', letterSpacing: '0.2px',
+    fontFamily: "'Orbitron', monospace",
+    fontWeight: 700,
+    fontSize: 13,
+    padding: '12px 32px',
+    borderRadius: 4,
+    transition: 'all 0.15s',
+    letterSpacing: '1.5px',
+    textTransform: 'uppercase',
   },
   ownerPanel: {
-    width: '100%', maxWidth: 300,
-    background: 'rgba(216,90,48,0.05)', border: '1px solid rgba(216,90,48,0.15)',
-    borderRadius: 14, padding: '1rem',
-    display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'stretch',
+    width: '100%',
+    maxWidth: 320,
+    background: 'rgba(0, 0, 0, 0.6)',
+    border: '1px solid rgba(255, 0, 255, 0.25)',
+    borderRadius: 6,
+    padding: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    alignItems: 'stretch',
   },
   ownerLabel: {
-    fontSize: 11, color: 'rgba(216,90,48,0.6)', fontWeight: 500,
-    textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2,
+    fontSize: 10,
+    color: '#ff00ff',
+    fontWeight: 600,
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    letterSpacing: '1.5px',
+    marginBottom: 2,
+    textShadow: '0 0 2px #ff00ff',
   },
   ownerBtn: {
-    fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 13,
-    background: '#D85A30', color: 'white', border: 'none',
-    borderRadius: 8, padding: '10px', cursor: 'pointer', transition: 'opacity 0.15s',
+    fontFamily: "'Orbitron', monospace",
+    fontWeight: 700,
+    fontSize: 12,
+    letterSpacing: '1px',
+    background: 'transparent',
+    color: '#00ffff',
+    border: '1px solid #00ffff',
+    borderRadius: 4,
+    padding: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    textTransform: 'uppercase',
   },
-  progress: { width: '100%', maxWidth: 300 },
+  progress: {
+    width: '100%',
+    maxWidth: 320,
+  },
   progressBar: {
-    height: 5, background: 'rgba(255,255,255,0.07)', borderRadius: 3, overflow: 'hidden',
+    height: 4,
+    background: 'rgba(0, 255, 255, 0.1)',
+    borderRadius: 2,
+    overflow: 'hidden',
   },
   progressFill: {
-    height: '100%', background: '#D85A30', borderRadius: 3, transition: 'width 0.4s ease',
+    height: '100%',
+    background: '#00ffff',
+    borderRadius: 2,
+    transition: 'width 0.4s ease',
+    boxShadow: '0 0 5px #00ffff',
   },
   progressText: {
-    fontSize: 12, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: 6,
+    fontSize: 11,
+    color: 'rgba(0, 255, 255, 0.5)',
+    textAlign: 'center',
+    marginTop: 6,
+    letterSpacing: '0.5px',
   },
   resultCard: {
-    width: '100%', maxWidth: 320,
-    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(216,90,48,0.2)',
-    borderRadius: 18, padding: '1.5rem', textAlign: 'center',
+    width: '100%',
+    maxWidth: 340,
+    background: 'rgba(0, 0, 0, 0.7)',
+    backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(0, 255, 255, 0.4)',
+    borderRadius: 8,
+    padding: '1.5rem',
+    textAlign: 'center',
     animation: 'fadeUp 0.4s ease',
+    boxShadow: '0 0 25px rgba(0, 255, 255, 0.1)',
   },
   resultLabel: {
-    fontSize: 11, color: 'rgba(255,255,255,0.35)',
-    textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8,
+    fontSize: 10,
+    color: '#ff00ff',
+    textTransform: 'uppercase',
+    letterSpacing: '2px',
+    marginBottom: 8,
+    textShadow: '0 0 2px #ff00ff',
   },
   resultValue: {
-    fontFamily: "'Syne', sans-serif", fontWeight: 800,
-    fontSize: 28, color: '#D85A30', marginBottom: 4,
+    fontFamily: "'Orbitron', monospace",
+    fontWeight: 800,
+    fontSize: 28,
+    color: '#00ffff',
+    marginBottom: 4,
+    textShadow: '0 0 5px #00ffff',
   },
   resultMeta: {
-    fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 4,
+    fontSize: 11,
+    color: 'rgba(0, 255, 255, 0.5)',
+    marginBottom: 4,
   },
   sidebar: {
-    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
-    borderRadius: 16, padding: '1.25rem',
+    background: 'rgba(0, 0, 0, 0.5)',
+    backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(0, 255, 255, 0.2)',
+    borderRadius: 8,
+    padding: '1.25rem',
   },
   sideLabel: {
-    fontSize: 11, color: 'rgba(255,255,255,0.25)', fontWeight: 500,
-    letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: 10,
+    fontSize: 10,
+    color: '#ff00ff',
+    fontWeight: 600,
+    letterSpacing: '1.5px',
+    textTransform: 'uppercase',
+    marginBottom: 10,
+    textShadow: '0 0 2px #ff00ff',
   },
-  playersList: { display: 'flex', flexDirection: 'column', gap: 5 },
+  playersList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 5,
+  },
   playerRow: {
-    display: 'flex', alignItems: 'center', gap: 10,
-    padding: '6px 8px', borderRadius: 10, transition: 'all 0.2s',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: '6px 8px',
+    borderRadius: 6,
+    transition: 'all 0.2s',
   },
   pName: {
-    fontSize: 14, fontWeight: 500,
-    display: 'flex', alignItems: 'center', gap: 5,
+    fontSize: 14,
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 5,
+    fontFamily: "'Rajdhani', sans-serif",
   },
   meTag: {
-    fontSize: 10, background: 'rgba(216,90,48,0.15)',
-    color: '#D85A30', borderRadius: 4, padding: '1px 5px', fontWeight: 500,
+    fontSize: 9,
+    background: 'rgba(0, 255, 255, 0.15)',
+    color: '#00ffff',
+    borderRadius: 2,
+    padding: '1px 5px',
+    fontWeight: 600,
+    letterSpacing: '0.5px',
   },
-  winnerTag: { fontSize: 13 },
-  pStatus: { fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 1 },
+  winnerTag: {
+    fontSize: 13,
+  },
+  pStatus: {
+    fontSize: 10,
+    color: 'rgba(0, 255, 255, 0.35)',
+    marginTop: 1,
+  },
   optionTag: {
-    fontSize: 12, borderRadius: 20,
-    padding: '3px 10px', transition: 'all 0.3s',
+    fontSize: 11,
+    borderRadius: 3,
+    padding: '3px 10px',
+    transition: 'all 0.3s',
+    fontFamily: "'Rajdhani', monospace",
+    letterSpacing: '0.3px',
   },
   errorToast: {
-    position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-    background: '#F09595', color: '#501313',
-    padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 500,
+    position: 'fixed',
+    bottom: 20,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: '#ff00ff',
+    color: '#0a0a0f',
+    padding: '10px 20px',
+    borderRadius: 4,
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: '0.5px',
+    fontFamily: "'Rajdhani', monospace",
+    zIndex: 100,
   },
 }
