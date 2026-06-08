@@ -108,14 +108,16 @@ export default function RoomPage() {
   const isOwner       = me?.is_owner || room?.owner_id === me?.id
   const isRaffle      = room.mode === 'raffle'
   // In raffle mode the wheel sectors ARE the player names
-  const raffleOptions = onlinePlayers.map(p => p.name)
+  // Use all players (not just is_online) to avoid timing issues where
+  // a player briefly appears offline during reconnection
+  const raffleOptions = players.map(p => p.name)
   // Group mode: use room.options (strip 'sorteo' placeholder just in case)
   const groupOptions  = room.options.filter(o => o !== 'sorteo')
   const wheelOptions  = isRaffle ? raffleOptions : groupOptions
   // Wheel is revealed once result is shown
   const wheelRevealed = showResult
-  // Ready to spin once WS init received and options are populated
-  const optionsReady  = wsReady && wheelOptions.length > 0
+  // Ready once WS init received. Group always has options; raffle needs at least 1 player.
+  const optionsReady  = wsReady && (isRaffle ? raffleOptions.length > 0 : groupOptions.length > 0)
 
   return (
     <div style={s.page}>
