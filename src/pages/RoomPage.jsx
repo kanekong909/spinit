@@ -71,7 +71,7 @@ export default function RoomPage() {
   }, [room?.status])
 
   function handleSpin() {
-    if (spinning || hasSpun || room?.status !== 'spinning') return
+    if (spinning || hasSpun || room?.status !== 'spinning' || !optionsReady) return
     setSpinning(true)
     wheelRef.current?.spin((spinResult) => {
       setSpinning(false)
@@ -106,12 +106,15 @@ export default function RoomPage() {
   const progressPct   = totalOnline > 0 ? Math.round((spunCount / totalOnline) * 100) : 0
   const isOwner       = me?.is_owner || room?.owner_id === me?.id
   const isRaffle      = room.mode === 'raffle'
-  // In raffle mode the wheel sectors ARE the player names
+  // In raffle mode the wheel sectors ARE the player names (never fall back to placeholder)
+  const raffleOptions = onlinePlayers.map(p => p.name)
   const wheelOptions  = isRaffle
-    ? onlinePlayers.map(p => p.name)
-    : room.options
+    ? (raffleOptions.length > 0 ? raffleOptions : null)  // null = not ready yet
+    : room.options.filter(o => o !== 'sorteo')           // strip placeholder if present
   // Wheel is revealed once result is shown
   const wheelRevealed = showResult
+  // Block spin until we have valid options
+  const optionsReady  = wheelOptions && wheelOptions.length > 0
 
   return (
     <div style={s.page}>
@@ -157,7 +160,7 @@ export default function RoomPage() {
           <div style={{ ...s.wheelWrap, marginBottom: 44 /* space for hidden label */ }}>
             <Wheel
               ref={wheelRef}
-              options={wheelOptions.length > 0 ? wheelOptions : room.options}
+              options={wheelOptions || ['...']}
               revealed={wheelRevealed}
             />
           </div>
@@ -166,7 +169,7 @@ export default function RoomPage() {
           {room.status === 'spinning' && (
             <button
               onClick={handleSpin}
-              disabled={spinning || hasSpun}
+              disabled={spinning || hasSpun || !optionsReady}
               style={{
                 ...s.spinBtn,
                 background: hasSpun ? 'rgba(255,255,255,0.06)' : '#D85A30',
