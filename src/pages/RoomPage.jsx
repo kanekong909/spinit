@@ -106,7 +106,7 @@ export default function RoomPage() {
   const totalOnline   = onlinePlayers.length
   const progressPct   = totalOnline > 0 ? Math.round((spunCount / totalOnline) * 100) : 0
   const isOwner       = me?.is_owner || room?.owner_id === me?.id
-  const isRaffle      = room.mode === 'raffle'
+  const isRaffle      = (room.mode ?? 'group') === 'raffle'
   // In raffle mode the wheel sectors ARE the player names
   // Use all players (not just is_online) to avoid timing issues where
   // a player briefly appears offline during reconnection

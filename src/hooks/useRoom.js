@@ -43,7 +43,7 @@ export function useRoom(roomId, playerId) {
         break
 
       case 'status_changed':
-        setRoom(prev => prev ? { ...prev, status: msg.status } : prev)
+        setRoom(prev => prev ? { ...prev, status: msg.status } : prev)  // mode/prize preserved via spread
         if (msg.status === 'spinning') {
           setSpunIds(new Set())
           setResult(null)
@@ -51,7 +51,8 @@ export function useRoom(roomId, playerId) {
         break
 
       case 'room_updated':
-        setRoom(prev => prev ? { ...prev, ...msg.room } : prev)
+        // Only update fields that room_updated actually sends — preserve mode/prize
+        setRoom(prev => prev ? { ...prev, ...msg.room, mode: prev.mode, prize: prev.prize } : prev)
         break
 
       case 'pong':
